@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Login | My Personal Blog{% endblock %}
+
+{% block content %}
+
+<div class="auth-page">
+
+    <div class="auth-card">
+
+        <div class="auth-icon">🔐</div>
+
+        <p class="eyebrow">WELCOME BACK</p>
+
+        <h1>Sign in to your account</h1>
+
+        <p class="auth-subtitle">
+            Continue writing, managing and sharing your ideas.
+        </p>
+
+        <form method="post" class="auth-form">
+
+            <label for="username">Username</label>
+
+            <input
+                id="username"
+                name="username"
+                type="text"
+                placeholder="Enter your username"
+                autocomplete="username"
+                required
+            >
+
+            <label for="password">Password</label>
+
+            <input
+                id="password"
+                name="password"
+                type="password"
+                placeholder="Enter your password"
+                autocomplete="current-password"
+                required
+            >
+
+            <button type="submit" class="full-button">
+                Login
+            </button>
+
+        </form>
+
+        <p class="auth-footer">
+            Don't have an account?
+            <a href="{{ url_for('register') }}">Create one</a>
+        </p>
+
+    </div>
+
+</div>
+
+{% endblock %}

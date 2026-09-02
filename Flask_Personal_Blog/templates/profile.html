@@ -1,0 +1,304 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile | My Personal Blog{% endblock %}
+
+{% block content %}
+
+<section class="profile-page">
+
+    <!-- =========================
+         PROFILE HERO
+    ========================== -->
+
+    <div class="profile-hero">
+
+        <div class="profile-avatar">
+            {{ user['username'][0]|upper }}
+        </div>
+
+        <div class="profile-info">
+
+            <p class="eyebrow">
+                PERSONAL PROFILE
+            </p>
+
+            <h1>
+                {{ user['username'] }}
+            </h1>
+
+            <p>
+                Welcome to your personal blogging space.
+                Create, manage and share your ideas.
+            </p>
+
+        </div>
+
+        <div class="profile-status">
+            <span class="status-dot"></span>
+            Active
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         STATISTICS
+    ========================== -->
+
+    <div class="profile-stats">
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                📝
+            </div>
+
+            <div class="stat-content">
+
+                <span>
+                    Total Posts
+                </span>
+
+                <strong>
+                    {{ total_posts }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                ❤️
+            </div>
+
+            <div class="stat-content">
+
+                <span>
+                    Total Likes
+                </span>
+
+                <strong>
+                    {{ total_likes }}
+                </strong>
+
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                💬
+            </div>
+
+            <div class="stat-content">
+
+                <span>
+                    Comments
+                </span>
+
+                <strong>
+                    {{ total_comments }}
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         MY POSTS
+    ========================== -->
+
+    <section class="profile-posts">
+
+        <div class="section-heading">
+
+            <div>
+
+                <p class="eyebrow">
+                    CONTENT MANAGEMENT
+                </p>
+
+                <h2>
+                    My Posts
+                </h2>
+
+                <p class="section-description">
+                    Manage your published articles and track engagement.
+                </p>
+
+            </div>
+
+            <a
+                class="hero-button"
+                href="{{ url_for('create') }}">
+
+                ✍️ New Post
+
+            </a>
+
+        </div>
+
+
+        {% if posts %}
+
+        <div class="profile-post-list">
+
+            {% for post in posts %}
+
+            <article class="profile-post-card">
+
+                <div class="profile-post-main">
+
+                    <div class="profile-post-top">
+
+                        <span class="category-badge">
+                            {{ post['category'] }}
+                        </span>
+
+                        <span class="post-date">
+                            {{ post['created_at'] }}
+                        </span>
+
+                    </div>
+
+
+                    <h3>
+
+                        <a
+                            href="{{ url_for(
+                                'post_detail',
+                                post_id=post['id']
+                            ) }}">
+
+                            {{ post['title'] }}
+
+                        </a>
+
+                    </h3>
+
+
+                    <p class="profile-post-excerpt">
+
+                        {{ post['content'][:180] }}
+
+                        {% if post['content']|length > 180 %}
+                            ...
+                        {% endif %}
+
+                    </p>
+
+
+                    <div class="profile-post-footer">
+
+                        <span>
+                            ❤️ {{ post['like_count'] }} Likes
+                        </span>
+
+                        <span>
+                            💬 {{ post['comment_count'] }} Comments
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <div class="profile-post-actions">
+
+                    <a
+                        class="edit-button"
+                        href="{{ url_for(
+                            'edit',
+                            post_id=post['id']
+                        ) }}">
+
+                        ✏️ Edit
+
+                    </a>
+
+                    <a
+                        class="secondary-button"
+                        href="{{ url_for(
+                            'post_detail',
+                            post_id=post['id']
+                        ) }}">
+
+                        View →
+
+                    </a>
+
+                </div>
+
+            </article>
+
+            {% endfor %}
+
+        </div>
+
+
+        {% else %}
+
+        <div class="empty-state">
+
+            <div class="empty-icon">
+                ✍️
+            </div>
+
+            <h3>
+                No posts yet
+            </h3>
+
+            <p>
+                Start sharing your ideas with the community.
+            </p>
+
+            <a
+                class="hero-button"
+                href="{{ url_for('create') }}">
+
+                Create Your First Post
+
+            </a>
+
+        </div>
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- =========================
+         PROFILE NAVIGATION
+    ========================== -->
+
+    <div class="profile-navigation">
+
+        <a
+            class="secondary-button"
+            href="{{ url_for('index') }}">
+
+            ← Back to Home
+
+        </a>
+
+        <a
+            class="secondary-button"
+            href="{{ url_for('dashboard') }}">
+
+            📊 Dashboard
+
+        </a>
+
+    </div>
+
+</section>
+
+{% endblock %}

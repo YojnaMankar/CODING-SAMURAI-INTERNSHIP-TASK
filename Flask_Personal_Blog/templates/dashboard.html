@@ -1,0 +1,510 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard | My Personal Blog{% endblock %}
+
+{% block content %}
+
+<div class="dashboard">
+
+    <!-- =========================
+         DASHBOARD HEADER
+    ========================== -->
+
+    <section class="dashboard-header">
+
+        <div class="dashboard-welcome">
+
+            <p class="eyebrow">
+                PERSONAL DASHBOARD
+            </p>
+
+            <h1>
+                Welcome back,
+                {{ session.get('username') }} 👋
+            </h1>
+
+            <p class="dashboard-subtitle">
+                Manage your content, track your activity
+                and grow your blog from one place.
+            </p>
+
+        </div>
+
+        <a href="{{ url_for('create') }}"
+           class="primary-button">
+            ✍️ Create New Post
+        </a>
+
+    </section>
+
+
+    <!-- =========================
+         STATISTICS
+    ========================== -->
+
+    <section class="stats-grid">
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                📝
+            </div>
+
+            <div class="stat-content">
+
+                <span>Total Posts</span>
+
+                <strong>
+                    {{ total_posts }}
+                </strong>
+
+                <small>
+                    Published content
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                🏷️
+            </div>
+
+            <div class="stat-content">
+
+                <span>Categories</span>
+
+                <strong>
+                    {{ category_count }}
+                </strong>
+
+                <small>
+                    Topics covered
+                </small>
+
+            </div>
+
+        </div>
+
+
+        <div class="stat-card">
+
+            <div class="stat-icon">
+                🟢
+            </div>
+
+            <div class="stat-content">
+
+                <span>Account Status</span>
+
+                <strong>
+                    Active
+                </strong>
+
+                <small>
+                    Ready to publish
+                </small>
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================
+         QUICK ACTIONS
+    ========================== -->
+
+    <section class="quick-actions">
+
+        <div class="quick-action-content">
+
+            <p class="eyebrow">
+                QUICK ACTIONS
+            </p>
+
+            <h2>
+                Manage Your Blog
+            </h2>
+
+            <p>
+                Create new content or explore what you've
+                already published.
+            </p>
+
+        </div>
+
+
+        <div class="action-buttons">
+
+            <a href="{{ url_for('create') }}"
+               class="primary-button">
+                ✍️ Write New Post
+            </a>
+
+            <a href="{{ url_for('index') }}"
+               class="secondary-button">
+                🔎 Explore Posts
+            </a>
+
+            <a href="{{ url_for('profile') }}"
+               class="secondary-button">
+                👤 My Profile
+            </a>
+
+        </div>
+
+    </section>
+
+
+    <!-- =========================
+         RECENT POSTS
+    ========================== -->
+
+    <section class="dashboard-section">
+
+        <div class="section-heading">
+
+            <div>
+
+                <p class="eyebrow">
+                    CONTENT MANAGEMENT
+                </p>
+
+                <h2>
+                    Recent Posts
+                </h2>
+
+                <p class="section-description">
+                    Your latest published content.
+                </p>
+
+            </div>
+
+            <a href="{{ url_for('index') }}"
+               class="view-all-link">
+                View All →
+            </a>
+
+        </div>
+
+
+        {% if recent_posts %}
+
+        <div class="dashboard-posts">
+
+            {% for post in recent_posts %}
+
+            <article class="dashboard-post">
+
+                <!-- POST CONTENT -->
+
+                <div class="dashboard-post-content">
+
+                    <div class="dashboard-post-top">
+
+                        <span class="category-badge">
+                            {{ post['category'] }}
+                        </span>
+
+                        <span class="post-date">
+                            {{ post['created_at'] }}
+                        </span>
+
+                    </div>
+
+
+                    <h3>
+                        <a href="{{ url_for(
+                            'post_detail',
+                            post_id=post['id']
+                        ) }}">
+                            {{ post['title'] }}
+                        </a>
+                    </h3>
+
+
+                    <p>
+                        {{ post['content'][:180] }}
+
+                        {% if post['content']|length > 180 %}
+                            ...
+                        {% endif %}
+                    </p>
+
+
+                    <small>
+                        Published {{ post['created_at'] }}
+                    </small>
+
+
+                    <!-- =========================
+                         LIKE + COMMENT COUNTS
+                    ========================== -->
+
+                    <div class="dashboard-engagement-row">
+
+                        <span class="dashboard-like-count">
+                            ❤️ {{ post['like_count'] }}
+                            Like{% if post['like_count'] != 1 %}s{% endif %}
+                        </span>
+
+
+                        <!-- REAL CLICKABLE BUTTON -->
+
+                        <button
+                            type="button"
+                            class="dashboard-comment-toggle"
+                            onclick="toggleCommentBox(this)"
+                        >
+                            💬
+                            {{ post['comment_count'] }}
+                            Comment{% if post['comment_count'] != 1 %}s{% endif %}
+                        </button>
+
+                    </div>
+
+
+                    <!-- =========================
+                         HIDDEN COMMENT BOX
+                    ========================== -->
+
+                    <div class="dashboard-comment-panel">
+
+                        {% if session.get('user_id') %}
+
+                        <form
+                            method="post"
+                            action="{{ url_for(
+                                'add_comment',
+                                post_id=post['id']
+                            ) }}"
+                            class="dashboard-comment-form"
+                        >
+
+                            <textarea
+                                name="comment"
+                                maxlength="500"
+                                placeholder="Share your thoughts..."
+                                required
+                            ></textarea>
+
+                            <div class="comment-form-actions">
+
+                                <button
+                                    type="submit"
+                                    class="primary-button"
+                                >
+                                    💬 Post Comment
+                                </button>
+
+                                <button
+                                    type="button"
+                                    class="comment-cancel-button"
+                                    onclick="toggleCommentBox(this)"
+                                >
+                                    Cancel
+                                </button>
+
+                            </div>
+
+                        </form>
+
+                        {% else %}
+
+                        <p class="login-comment-message">
+                            Please
+                            <a href="{{ url_for('login') }}">
+                                login
+                            </a>
+                            to comment.
+                        </p>
+
+                        {% endif %}
+
+                    </div>
+
+                </div>
+
+
+                <!-- =========================
+                     LIKE BUTTON
+                ========================== -->
+
+                <div class="dashboard-like-section">
+
+                    <form
+                        method="post"
+                        action="{{ url_for(
+                            'like_post',
+                            post_id=post['id']
+                        ) }}"
+                    >
+
+                        <button
+                            type="submit"
+                            class="like-button"
+                        >
+                            ❤️ Like
+                        </button>
+
+                    </form>
+
+                </div>
+
+
+                <!-- =========================
+                     ACTION BUTTONS
+                ========================== -->
+
+                <div class="dashboard-post-actions">
+
+                    <a
+                        href="{{ url_for(
+                            'post_detail',
+                            post_id=post['id']
+                        ) }}"
+                        class="secondary-button"
+                    >
+                        👁️ View Post
+                    </a>
+
+
+                    <a
+                        href="{{ url_for(
+                            'edit',
+                            post_id=post['id']
+                        ) }}"
+                        class="edit-button"
+                    >
+                        ✏️ Edit
+                    </a>
+
+
+                    <form
+                        method="post"
+                        action="{{ url_for(
+                            'delete',
+                            post_id=post['id']
+                        ) }}"
+                        onsubmit="return confirm(
+                            'Are you sure you want to delete this post?'
+                        );"
+                    >
+
+                        <button
+                            type="submit"
+                            class="delete-button"
+                        >
+                            🗑️ Delete
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </article>
+
+            {% endfor %}
+
+        </div>
+
+
+        {% else %}
+
+        <!-- EMPTY STATE -->
+
+        <div class="empty-dashboard">
+
+            <div class="empty-icon">
+                ✍️
+            </div>
+
+            <h3>
+                Your blog is waiting for its first post
+            </h3>
+
+            <p>
+                Share your thoughts, knowledge and experiences.
+            </p>
+
+            <a
+                href="{{ url_for('create') }}"
+                class="primary-button"
+            >
+                Create Your First Post
+            </a>
+
+        </div>
+
+        {% endif %}
+
+    </section>
+
+
+    <!-- =========================
+         FOOTER ACTIONS
+    ========================== -->
+
+    <div class="dashboard-footer">
+
+        <a
+            href="{{ url_for('profile') }}"
+            class="secondary-button"
+        >
+            👤 View Profile
+        </a>
+
+        <a
+            href="{{ url_for('index') }}"
+            class="secondary-button"
+        >
+            🏠 Back to Home
+        </a>
+
+    </div>
+
+</div>
+
+
+<!-- =========================
+     COMMENT TOGGLE SCRIPT
+========================== -->
+
+<script>
+
+function toggleCommentBox(button) {
+
+    const post = button.closest(".dashboard-post");
+
+    const commentBox =
+        post.querySelector(".dashboard-comment-panel");
+
+    if (!commentBox) {
+        return;
+    }
+
+    commentBox.classList.toggle("open");
+
+    if (commentBox.classList.contains("open")) {
+
+        const textarea =
+            commentBox.querySelector("textarea");
+
+        if (textarea) {
+            setTimeout(function () {
+                textarea.focus();
+            }, 100);
+        }
+
+    }
+
+}
+
+</script>
+
+{% endblock %}
