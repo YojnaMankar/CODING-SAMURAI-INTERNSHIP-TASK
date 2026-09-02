@@ -1,50 +1,89 @@
+import os
 import requests
+from dotenv import load_dotenv
+
+load_dotenv()
+
+API_KEY = os.getenv("OPENWEATHER_API_KEY")
+BASE_URL = "https://api.openweathermap.org/data/2.5/weather"
+
 
 def get_weather(city):
-    # Geocoding API: converts city name to coordinates.
-    geo_url = "https://geocoding-api.open-meteo.com/v1/search"
-    geo = requests.get(geo_url, params={"name": city, "count": 1, "language": "en"}, timeout=10)
-    geo.raise_for_status()
-    locations = geo.json().get("results", [])
-    if not locations:
-        raise ValueError("City not found.")
-
-    place = locations[0]
-    lat, lon = place["latitude"], place["longitude"]
-
-    # Open-Meteo weather API: no API key required.
-    weather_url = "https://api.open-meteo.com/v1/forecast"
-    weather = requests.get(
-        weather_url,
-        params={
-            "latitude": lat,
-            "longitude": lon,
-            "current": "temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code",
-            "timezone": "auto",
-        },
-        timeout=10,
-    )
-    weather.raise_for_status()
-    return place, weather.json()["current"]
-
-def main():
-    print("=== Weather App ===")
-    city = input("Enter city name: ").strip()
-    if not city:
-        print("Please enter a city.")
+    if not API_KEY:
+        print("❌ API key not found. Please check your .env file.")
         return
 
+    params = {
+        "q": city,
+        "appid": API_KEY,
+        "units": "metric"
+    }
+
     try:
-        place, current = get_weather(city)
-        print(f"\nLocation: {place['name']}, {place.get('country', '')}")
-        print(f"Temperature: {current['temperature_2m']} °C")
-        print(f"Humidity: {current['relative_humidity_2m']} %")
-        print(f"Wind speed: {current['wind_speed_10m']} km/h")
-        print(f"Weather code: {current['weather_code']}")
-    except requests.RequestException:
-        print("Network/API error. Check your internet connection and try again.")
-    except ValueError as exc:
-        print(exc)
+        response = requests.get(
+            BASE_URL,
+            params=params,
+            timeout=10
+        )
+
+        if response.status_code == 404:
+            print("❌ City not found. Please check the city name.")
+            return
+
+        if response.status_code == 401:
+            print("❌ Invalid API key or API key is not activated.")
+            return
+
+        response.raise_for_status()
+
+        data = response.json()
+
+        city_name = data["name"]
+        country = data["sys"]["country"]
+        temperature_c = data["main"]["temp"]
+        humidity = data["main"]["humidity"]
+        description = data["weather"][0]["description"]
+        wind_speed = data["wind"]["speed"]
+
+        temperature_f = (temperature_c * 9 / 5) + 32
+
+        print("\n================================")
+        print("          WEATHER APP")
+        print("================================")
+        print(f"📍 Location      : {city_name}, {country}")
+        print(f"🌡️ Temperature   : {temperature_c:.1f} °C")
+        print(f"🌡️ Temperature   : {temperature_f:.1f} °F")
+        print(f"💧 Humidity      : {humidity}%")
+        print(f"☁️ Condition     : {description.title()}")
+        print(f"💨 Wind Speed    : {wind_speed} m/s")
+        print("================================")
+
+    except requests.exceptions.Timeout:
+        print("❌ Request timed out. Please try again.")
+
+    except requests.exceptions.ConnectionError:
+        print("❌ Internet connection error.")
+
+    except requests.exceptions.RequestException as error:
+        print(f"❌ API error: {error}")
+
+
+def main():
+    print("\n=== Weather App ===")
+
+    while True:
+        city = input("\nEnter city name (or 'exit' to quit): ").strip()
+
+        if city.lower() == "exit":
+            print("👋 Weather App closed.")
+            break
+
+        if not city:
+            print("❌ Please enter a city name.")
+            continue
+
+        get_weather(city)
+
 
 if __name__ == "__main__":
     main()
